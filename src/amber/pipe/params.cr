@@ -18,9 +18,10 @@ module Amber
         @@instance ||= new
       end
 
-      def call(context)
+      def call(context : HTTP::Server::Context)
         context.clear_params
         parse(context)
+        context.params_parsed = true
         call_next(context)
       end
 

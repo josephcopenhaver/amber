@@ -9,7 +9,7 @@ require "../src/amber"
 
 class HelloController < Amber::Controller::Base
   def world
-    "Server Running!"
+    "Server Running! #{params}"
   end
 end
 
@@ -34,6 +34,8 @@ MY_APP_SERVER.config do |app|
   pipeline :api do
     # Plug is the method to use connect a pipe (middleware)
     # A plug accepts an instance of HTTP::Handler
+    plug Amber::Pipe::Params.new
+    # plug HTTP::CompressHandler.new
   end
 
   # All static content will run these transformations
@@ -50,8 +52,8 @@ MY_APP_SERVER.config do |app|
     # Each route is defined as follow
     # verb, resources : String, controller : Symbol, action : Symbol,
     # pipeline : Symbol
-    get "/*", HelloController, :world, :static
     get "/hello", HelloController, :world, :api
+    get "/*", HelloController, :world, :static
     get "/hello/:planet", HelloController, :world, :api
   end
 end

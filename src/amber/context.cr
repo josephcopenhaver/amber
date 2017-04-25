@@ -3,6 +3,7 @@
 # response object.  Params and Session hash can be accessed from the Context.
 class HTTP::Server::Context
   alias ParamTypes = Nil | String | Int64 | Float64 | Bool | Hash(String, JSON::Type) | Array(JSON::Type)
+  property params_parsed : Bool?
 
   # clear the params.
   def clear_params
