@@ -11,21 +11,7 @@ module Amber::Support
 
     # Encrypt and sign a message. We need to sign the message in order to avoid
     # padding attacks. Reference: http://www.limited-entropy.com/padding-oracle-attacks.
-    def encrypt_and_sign(value : Slice(UInt8)) : String
-      verifier.generate(_encrypt(value))
-    end
-
-    def encrypt_and_sign(value : String) : String
-      encrypt_and_sign(value.to_slice)
-    end
-
-    # Decrypt and verify a message. We need to verify the message in order to
-    # avoid padding attacks. Reference: http://www.limited-entropy.com/padding-oracle-attacks.
-    def decrypt_and_verify(value : String) : Bytes
-      _decrypt(verifier.verify(value))
-    end
-
-    private def _encrypt(value)
+    def encrypt_and_sign(message : Slice(UInt8)) : String
       cipher = new_cipher
       cipher.encrypt
       cipher.key = @secret
@@ -34,13 +20,19 @@ module Amber::Support
       iv = cipher.random_iv
 
       encrypted_data = IO::Memory.new
-      encrypted_data.write(cipher.update(value))
+      encrypted_data.write(cipher.update(message))
       encrypted_data.write(cipher.final)
 
       "#{::Base64.strict_encode encrypted_data}--#{::Base64.strict_encode iv}"
     end
 
-    private def _decrypt(encrypted_message)
+    def encrypt_and_sign(message : String) : String
+      encrypt_and_sign(message.to_slice)
+    end
+
+    # Decrypt and verify a message. We need to verify the message in order to
+    # avoid padding attacks. Reference: http://www.limited-entropy.com/padding-oracle-attacks.
+    def decrypt_and_verify(encrypted_message : String) : Bytes
       cipher = new_cipher
       encrypted_data, iv = encrypted_message.split("--").map { |v| ::Base64.decode(v) }
 
@@ -54,6 +46,12 @@ module Amber::Support
       decrypted_data.to_slice
     rescue OpenSSL::Cipher::Error
       raise Exceptions::InvalidMessage.new
+    end
+
+    private def _encrypt(value)
+    end
+
+    private def _decrypt(encrypted_message)
     end
 
     private def new_cipher

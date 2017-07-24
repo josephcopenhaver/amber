@@ -107,7 +107,7 @@ module Amber::Router
 
     it "gets an encrypted cookie" do
       cookies = new_cookie_store
-      cookie = HTTP::Cookie::Parser.parse_cookies("user_name=V2dOdEU0dzhQSWJ3V0RsOHVJOFdaSnJER2VEa1hxMTJtQ09LOFZkTm9xMD0tLU1hUDQ4dWpSWXhndEU1RU5yNDRXRlE9PQ==--4b887ed5ce9e000fa21b00bf9a474e17b8e662dc195f3db83fc424cd3d8b891d; path=/").first
+      cookie = HTTP::Cookie::Parser.parse_cookies("user_name=WgNtE4w8PIbwWDl8uI8WZJrDGeDkXq12mCOK8VdNoq0=--MaP48ujRYxgtE5ENr44WFQ==; path=/").first
 
       cookies[cookie.name] = cookie
 
