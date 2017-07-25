@@ -123,6 +123,7 @@ module Amber
         end
 
         def keep(key)
+          # broken
           @discard.subtract key.to_s.to_set
         end
 
@@ -134,7 +135,7 @@ module Amber
 
         def sweep
           @discard.each { |k| @flashes.delete k }
-          @discard = @discard.map(&.to_s).to_set | @flashes.keys.map(&.to_s).to_set
+          @discard.clear
         end
 
         def alert
