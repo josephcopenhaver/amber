@@ -10,9 +10,8 @@ module Amber
       def call(context)
         call_next(context)
       ensure
-        session = context.session
         flash = context.flash.not_nil!
-        session[PARAM_KEY] = flash.to_session
+        context.session[PARAM_KEY] = flash.to_session
       end
     end
   end
@@ -60,7 +59,7 @@ module Amber
         })
 
         def self.from_session_value(json)
-          from_json(json).tap(&.sweep)
+          from_json(json)
         rescue e : JSON::ParseException
           new
         end
@@ -123,10 +122,8 @@ module Amber
           @now ||= FlashNow.new(self)
         end
 
-        def keep(key = nil)
-          k = key.to_s if key
-          @discard.subtract k
-          k ? self[k] : self
+        def keep(key)
+          @discard.subtract key.to_s.to_set
         end
 
         def discard(key = nil)
@@ -157,7 +154,7 @@ module Amber
         end
 
         def to_session
-          {"flashes": @flashes, "discard": @discard}.to_json
+          @flashes.to_json
         end
       end
     end
