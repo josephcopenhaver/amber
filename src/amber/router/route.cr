@@ -4,7 +4,7 @@ module Amber
 
     def initialize(@verb : String,
                    @resource : String,
-                   @handler : Proc(HTTP::Server::Context),
+                   @handler : (HTTP::Server::Context ->),
                    @action : Symbol = :index,
                    @valve : Symbol = :web,
                    @scope : String = "",
