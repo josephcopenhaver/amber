@@ -159,10 +159,11 @@ module Amber::Controller
     describe "#redirect_to" do
       context "with url params" do
         it "sets the url params to path" do
-          hello_controller = build_controller("/world")
-          hello_controller.redirect_to(:world, 302, {"hello" => "world"})
+          controller = build_controller("/world")
+          controller.redirect_to(:world, 302, {"hello" => "world"})
 
-          response = hello_controller.response
+          puts controller.context.request_handler
+          response = controller.response
 
           response.headers["Location"].should eq "/hello/world?hello=world"
         end
