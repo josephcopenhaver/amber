@@ -22,6 +22,10 @@ module Amber::Controller
       )
     end
 
+    def redirect_to(**options)
+      Redirector.new(context).redirect(**options)
+    end
+
     def redirect_back(flash = nil )
       Redirector.new(context).redirect(flash: flash, path: context.request.headers["Referer"])
     end
@@ -61,31 +65,8 @@ module Amber::Controller
     end
   end
 
-<<<<<<< HEAD
-  module RedirectFactory
-    def redirect_to(location : String, *args)
-      LocationRedirect.new(location, *args).redirect(response)
-      halt!(response.status_code, "Redirecting to #{response.headers["Location"]}")
-    end
+  record QueryString, query_string do
 
-    # Redirects to the specified controller, action
-    def redirect_to(controller : Symbol, action : Symbol, *args)
-      LocationRedirect.new("/#{controller}/#{action}", *args).redirect(response)
-      halt!(response.status_code, "Redirecting to #{response.headers["Location"]}")
-    end
-
-    # Redirects within the same controller
-    def redirect_to(action : Symbol, *args)
-      controller = self.class.to_s.chomp("Controller").downcase
-      LocationRedirect.new("/#{controller}/#{action}", *args).redirect(response)
-      halt!(response.status_code, "Redirecting to #{response.headers["Location"]}")
-    end
-
-    def redirect_back(*args)
-      LocationRedirect.new(request.headers["Referer"]).redirect(response)
-      halt!(response.status_code, "Redirecting to #{response.headers["Location"]}")
-=======
-  class QueryString
     def self.parse(query_string)
       new(query_string).to_s
     end

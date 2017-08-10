@@ -14,6 +14,34 @@ module Amber::Controller
         context.response.status_code.should eq 304
         context.response.headers["location"] = "/some/path"
       end
+
+	  context "query string" do
+		it "parses query params from a string" do
+			request = HTTP::Request.new("GET", "/")
+			context = create_context(request)
+			redirector = Redirector.new(context)
+			options = {path: "/some/path", query_string: "hello=world&none=&val=1", status: 304}
+			result = redirector.redirect(**options)
+
+			context.halt.should eq true
+			context.response.status_code.should eq 304
+        	context.response.headers["location"] = "/some/path/?#{HTTP::Params.parse(options[:query_string]).to_s}"
+		end
+
+		it "parses query params from Hash(String, String)" do
+			request = HTTP::Request.new("GET", "/")
+			context = create_context(request)
+			redirector = Redirector.new(context)
+			query_string = { "hello" => "world", "none" => "", "val" => "1" }
+			options = {path: "/some/path", query_string: query_string, status: 304}
+			result = redirector.redirect(path: "/some/path", query_string: query_string)
+
+			context.halt.should eq true
+			context.response.status_code.should eq 304
+        	context.response.headers["location"] = "/some/path/?#{HTTP::Params.parse(query_string).to_s}"
+		end
+
+	  end
     end
   end
 
