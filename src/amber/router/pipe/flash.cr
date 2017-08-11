@@ -92,6 +92,14 @@ module Amber
           self
         end
 
+        def merge!(other : Hash(String | Symbol, String))
+          other.each do |k, v|
+            @flashes[k.to_s] = v
+          end
+          @flashes
+        end
+
+
         def keys
           @flashes.keys
         end

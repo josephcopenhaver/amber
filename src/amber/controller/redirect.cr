@@ -10,23 +10,22 @@ module Amber::Controller
     def redirect_to(action : Symbol?, status = 302, query_string = nil, flash = nil)
       query = QueryString.new(query_string).to_s
       Redirector.new(context).redirect(
-        status: status, flash: flash, query_string: query, action: action,
+        status: status, flash: flash, query_string: query, action: action, controller: controller_name
       )
     end
 
-    def redirect_to(controller : Symbol?, action : Symbol?, status = 302, query_string = nil, flash = nil)
+    def redirect_to(action : Symbol?, controller : Symbol? = controller_name, status = 302, query_string = nil, flash = nil)
       query = QueryString.new(query_string).to_s
-
       Redirector.new(context).redirect(
         status: status, flash: flash, controller: controller, action: action, query_string: query
       )
     end
 
     def redirect_to(**options)
-      Redirector.new(context).redirect(**options)
+      Redirector.new(context).redirect(options)
     end
 
-    def redirect_back(flash = nil )
+    def redirect_back(flash = nil)
       Redirector.new(context).redirect(flash: flash, path: context.request.headers["Referer"])
     end
   end
@@ -39,20 +38,16 @@ module Amber::Controller
       url = build_url(options)
       write_flash(flash)
       write_headers(status, url)
-      halt!
-      "Redirecting to #{url}"
+      halt!(url)
     end
 
     private def build_url(options)
       UrlBuilder.new(**options).to_s
     end
 
-    private def halt!
+    private def halt!(url)
       @context.halt = true
-    end
-
-    private def controller
-      @context.request_handler.controller.downcase
+      @context.content = "Redirecting to #{url}"
     end
 
     private def write_flash(flash)
@@ -66,7 +61,6 @@ module Amber::Controller
   end
 
   record QueryString, query_string do
-
     def self.parse(query_string)
       new(query_string).to_s
     end
@@ -102,8 +96,7 @@ module Amber::Controller
     path : String? | Symbol? = nil,
     end_slash : Bool = true,
     action : Symbol? = nil,
-    controller : Symbol? = nil do
-
+    controller : String | Symbol? = nil do
     def to_s
       location = if only_path
                    build_path.to_s

@@ -136,22 +136,24 @@ module Amber::Controller
     describe "#redirect_back" do
       context "and has a valid referer" do
         it "sets the correct response headers" do
-          hello_controller = build_controller("/world")
+          controller = build_controller("/world")
 
-          hello_controller.redirect_back
-          response = hello_controller.response
+          controller.redirect_back
+          response = controller.response
 
           response.headers["Location"].should eq "/world"
         end
       end
 
       context "and does not have a referer" do
-        it "raisees an error" do
-          hello_controller = build_controller
+        it "halts the requests and sets context.content" do
+          controller = build_controller("")
+          controller.redirect_back
 
-          expect_raises Exceptions::Controller::Redirect do
-            hello_controller.redirect_back
-          end
+          context = controller.context
+
+          context.content.should eq "Redirecting to /"
+          context.halt.should eq true
         end
       end
     end
@@ -162,20 +164,41 @@ module Amber::Controller
           controller = build_controller("/world")
           controller.redirect_to(:world, 302, {"hello" => "world"})
 
-          puts controller.context.request_handler
           response = controller.response
 
           response.headers["Location"].should eq "/hello/world?hello=world"
         end
       end
 
+      context "whith flash" do
+        it "sets the flash scope from Hash(Symbol, String)" do
+          controller = build_controller("")
+          query = {} of String => String
+          controller.redirect_to(:world, 302, query, {:notice => "Success!"})
+
+          flash = controller.flash
+
+          flash["notice"].should eq "Success!"
+        end
+
+        it "sets the flash scope from Hash(String, String)" do
+          controller = build_controller("")
+          query = {} of String => String
+          controller.redirect_to(:world, 302, query, {"notice" => "Success!"})
+
+          flash = controller.flash
+
+          flash["notice"].should eq "Success!"
+        end
+      end
+
       context "when redirecting to url or path" do
         ["www.amberio.com", "/world"].each do |location|
           it "sets the location to #{location}" do
-            hello_controller = build_controller
-            hello_controller.redirect_to(location, 301)
+            controller = build_controller
+            controller.redirect_to(location, 301)
 
-            response = hello_controller.response
+            response = controller.response
 
             response.headers["Location"].should eq location
             response.status_code.should eq 301
@@ -185,20 +208,18 @@ module Amber::Controller
 
       context "with invalid url or path" do
         it "raises redirect error" do
-          hello_controller = build_controller
+          controller = build_controller
 
-          expect_raises Exceptions::Controller::Redirect do
-            hello_controller.redirect_to "saasd"
-          end
+          controller.redirect_to "saasd"
         end
       end
 
       context "when redirecting to controller action" do
         it "sets the controller and action" do
-          hello_controller = build_controller
-          hello_controller.redirect_to :world, 301
+          controller = build_controller
+          controller.redirect_to :world, 301
 
-          response = hello_controller.response
+          response = controller.response
 
           response.headers["Location"].should eq "/hello/world"
           response.status_code.should eq 301
@@ -207,10 +228,10 @@ module Amber::Controller
 
       context "when redirecting to different controller" do
         it "sets new controller and action" do
-          hello_controller = build_controller
-          hello_controller.redirect_to :hello, :index, 301
+          controller = build_controller
+          controller.redirect_to :index, :hello, 301
 
-          response = hello_controller.response
+          response = controller.response
 
           response.headers["Location"].should eq "/hello/index"
           response.status_code.should eq 301
