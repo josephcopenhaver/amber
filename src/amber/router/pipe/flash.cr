@@ -99,7 +99,6 @@ module Amber
           @flashes
         end
 
-
         def keys
           @flashes.keys
         end

@@ -40,7 +40,7 @@ module Amber::Controller
     end
 
     def controller_name
-        self.class.name.downcase.gsub("controller", "")
+      self.class.name.downcase.gsub("controller", "")
     end
   end
 end
