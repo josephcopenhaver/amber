@@ -8,10 +8,9 @@ module Amber::Controller
         context = create_context(request)
         redirector = Redirector.new(context)
         options = {path: "/some/path", status: 304}
-
         result = redirector.redirect(**options)
 
-        context.content.nil?.should eq false
+        context.halt.should eq true
         context.response.status_code.should eq 304
         context.response.headers["location"] = "/some/path"
       end
@@ -22,15 +21,13 @@ module Amber::Controller
           context = create_context(request)
           redirector = Redirector.new(context)
           options = {path: "/some/path", query_string: "hello=world&none=&val=1", status: 304}
-
           result = redirector.redirect(**options)
 
-          context.content.nil?.should eq false
+          context.halt.should eq true
           context.response.status_code.should eq 304
           context.response.headers["location"] = "/some/path/?#{HTTP::Params.parse(options[:query_string]).to_s}"
         end
       end
-
     end
   end
 
