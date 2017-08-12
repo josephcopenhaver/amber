@@ -85,6 +85,12 @@ module Amber::Controller
     end
   end
 
+  record ResourcefulPath, controller: String? | Symbol?, action: String? | Symbol? do
+    # Lookup controller action resource
+    # Parse params for resources
+    # Return the resourceful path
+  end
+
   record UrlBuilder,
     domain : String? = nil,
     protocol : String = "http",
@@ -142,7 +148,6 @@ module Amber::Controller
       if end_slash && (build_path.to_s.empty? || build_path.to_s.chars.last == "/")
         "/"
       end
->>>>>>> progress
     end
   end
 end
