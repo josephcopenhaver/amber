@@ -25,8 +25,7 @@ module Amber
       class FlashNow
         property :flash
 
-        def initialize(flash)
-          @flash = flash
+        def initialize(@flash)
         end
 
         def []=(key, value)
@@ -54,7 +53,7 @@ module Amber
         include Enumerable(String)
 
         JSON.mapping({
-          flashes: Hash(String | Symbol, String),
+          flashes: Hash(String, String),
           discard: Set(String),
         })
 
@@ -67,27 +66,26 @@ module Amber
         delegate :each, to: :flashes
 
         def initialize
-          @flashes = Hash(String | Symbol, String).new
+          @flashes = Hash(String, String).new
           @discard = Set(String).new
         end
 
         def discard=(value : Array(String))
-          @discard = value.to_set
+          @discard.merge value
         end
 
         def []=(key, value)
-          k = key.to_s
-          @discard.delete k
-          @flashes[k] = value
+          @flashes[k.to_s] = value.to_s
         end
 
         def [](key)
-          @flashes[key.to_s]?
+          @discard.add(key = key.to_s)
+          @flashes[key]?
         end
 
         def update(hash : Hash(String, String)) # :nodoc:
           @discard.subtract hash.keys
-          @flashes.update hash
+          # @flashes.update hash 
           self
         end
 
@@ -123,19 +121,13 @@ module Amber
         end
 
         def keep(key)
-          # broken
-          @discard.subtract key.to_s.to_set
+          @discard.delete(key = key.to_s)
+          @flashes[key]
         end
 
-        def discard(key = nil)
-          k = key ? [key.to_s] : self.keys.map(&.to_s)
-          @discard.concat k.to_set
-          k ? self[k] : self
-        end
-
-        def sweep
-          @discard.each { |k| @flashes.delete k }
-          @discard.clear
+        def discard(key)
+          @discard.add(key = key.to_s)
+          @flashes[key]
         end
 
         def alert
@@ -155,6 +147,7 @@ module Amber
         end
 
         def to_session
+          @discard.each { |k| @flashes.delete k }
           @flashes.to_json
         end
       end
