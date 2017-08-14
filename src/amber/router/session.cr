@@ -11,6 +11,8 @@ module Amber::Router
 
       def build : Session::AbstractStore
         @session_store ||= case session[:store]
+                           when :memcached
+                             memcached
                            when :redis
                              redis
                            when :encrypted_cookie
@@ -18,6 +20,11 @@ module Amber::Router
                            else
                              signed_cookie
                            end
+      end
+
+      def memcached
+        store = Memcached::Client.new(host: session[:memcached_host].to_s, port: session[:memcached_port].to_i)
+        Session::MemcachedStore.new(store, session[:key].to_s, session[:expires].to_i)
       end
 
       def redis

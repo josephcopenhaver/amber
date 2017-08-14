@@ -5,6 +5,7 @@ require "colorize"
 require "secure_random"
 require "kilt"
 require "kilt/slang"
+require "memcached"
 require "redis"
 require "./amber/**"
 
@@ -41,6 +42,8 @@ module Amber
     property port_reuse : Bool = false
     getter key_generator : Amber::Support::CachingKeyGenerator
     property pubsub_adapter : WebSockets::Adapters::RedisAdapter.class | WebSockets::Adapters::MemoryAdapter.class
+    property memcached_host : String
+    property memcached_port : Int32
     property redis_url : String
     property session : Hash(Symbol, Symbol | Int32 | String)
     property ssl_key_file : String?
@@ -60,14 +63,18 @@ module Amber
         Amber::Support::KeyGenerator.new(secret, 5)
       )
       @pubsub_adapter = WebSockets::Adapters::MemoryAdapter
+      @memcached_host = "localhost"
+      @memcached_port = 11211
       @redis_url = "redis://localhost:6379"
       @session = {
         :key => "session_id",
-        # store can be [:signed_cookie, :encrypted_cookie, :redis]
+        # store can be [:signed_cookie, :encrypted_cookie, :redis, :memcached]
         :store     => :signed_cookie,
         :expires   => 0,
         :secret    => secret,
         :redis_url => "redis://localhost:6379",
+        :memcached_host => "localhost",
+        :memcached_port => 11211,
       }
     end
 
