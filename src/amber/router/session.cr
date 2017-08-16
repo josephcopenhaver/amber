@@ -12,10 +12,13 @@ module Amber::Router
       def build : Session::AbstractStore
         @session_store ||= case session[:store]
                            when :redis
+                             puts "using redis cache"
                              redis
                            when :encrypted_cookie
+                             puts "using encrypted_cookie cache"
                              encrypted_cookie
                            else
+                             puts "using signed_cookie cache"
                              signed_cookie
                            end
       end
