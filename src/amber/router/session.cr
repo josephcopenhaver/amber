@@ -11,9 +11,9 @@ module Amber::Router
 
       def build : Session::AbstractStore
         @session_store ||= case session[:store]
-                           when :redis
+                           when "redis"
                              redis
-                           when :encrypted_cookie
+                           when "encrypted_cookie"
                              encrypted_cookie
                            else
                              signed_cookie
